@@ -1,0 +1,1 @@
+This project investigates whether system-level inefficiencies (high energy losses and poor load factors) are statistically correlated with higher retail rates for residential consumers. By isolating a single state, the study accounts for regional climate and regulatory oversight, providing a "Fairness Audit" of local utility management.
