@@ -1,5 +1,3 @@
-import numpy as np
-
 def get_state_variance(df):
     scout_df = df.groupby('Utility.State').agg({
         'ResidentialPrice': ['std', 'mean'],      # High std = High drama
@@ -40,7 +38,9 @@ def prepare_data(df):
     
     # Operational metric of 'stress' on system
     df['LoadFactor'] = df['Sources.Total'] / (df['Demand.Summer Peak'] * 8760)
-    df['LoadFactor'].apply(lambda load: 0 if load == np.inf else load)
+    df['LoadFactor'] = df['LoadFactor'].apply(lambda load: 0 if load == float('inf') else load)
+
+    df['FairnessIndex'] = df['ResidentialUnitPrice'] / df['LoadFactor']
 
     return df
 
