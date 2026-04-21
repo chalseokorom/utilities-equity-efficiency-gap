@@ -12,8 +12,9 @@ def get_state_data(state, df):
     keep_columns = ["Utility.Name", "Utility.State", "Utility.Type", 
                 "Sources.Total", "Sources.Generation", "Sources.Purchased", "Sources.Other",
                 "Retail.Residential.Revenue", "Retail.Residential.Sales", "Retail.Residential.Customers", 
-                "Retail.Industrial.Revenue", "Retail.Industrial.Sales",
-                "Uses.Retail", "Uses.Losses", "Uses.Total", "Demand.Summer Peak", "Revenues.Retail"]
+                "Retail.Industrial.Revenue", "Retail.Industrial.Sales", "Retail.Industrial.Customers",
+                "Uses.Retail", "Uses.Losses", "Uses.Resale", "Uses.No Charge", "Uses.Consumed", "Uses.Total",
+                "Demand.Summer Peak", "Revenues.Retail"]
     
     return df[df["Utility.State"] == state][keep_columns]
 
@@ -22,7 +23,7 @@ def prepare_data(df):
     df['ResidentialUnitPrice'] = (df['Retail.Residential.Revenue'] / df['Retail.Residential.Sales']) * 1000
     df['ResidentialUnitPrice'] = df['ResidentialUnitPrice'].fillna(0)
 
-    # Residential $ per MWh
+    # Industrial $ per MWh
     df['IndustrialUnitPrice'] = df['Retail.Industrial.Revenue'] / df['Retail.Industrial.Sales']
     df['IndustrialUnitPrice'] = df['IndustrialUnitPrice'].fillna(0)
 
@@ -44,4 +45,31 @@ def prepare_data(df):
 
     return df
 
+def get_customer_utilities(df, customer):
+    if customer == "Residential":
+        return df[df["Retail.Residential.Customers"] > 0]
+    elif customer == "Industrial":
+        return df[df["Retail.Industrial.Customers"] > 0]
+    else:
+        return df[(df["Retail.Residential.Customers"] > 0) & (df["Retail.Industrial.Customers"] > 0)]
 
+def get_residential_load_factor(df):
+    df = get_customer_utilities(df, "Residential")
+    return df[df["LoadFactor"] > 0]
+
+def get_residential_sys_loss(df):
+    df = get_customer_utilities(df, "Residential")
+    return df[df["SystemLossPercentage"] > 0]
+
+def get_utility_usage(utility):
+    # Convert raw values to percentages of the 'Total Sources'
+    keys = [
+        'Sources.Generation', 'Sources.Purchased', 'Sources.Other',
+        'Uses.Retail', 'Uses.Resale', 'Uses.Losses', 
+        'Uses.Consumed', 'Uses.No Charge'
+    ]
+
+    named_utility = (utility[keys] / utility['Sources.Total']) * 100
+    named_utility['Utility.Name'] = utility['Utility.Name']
+    
+    return named_utility
