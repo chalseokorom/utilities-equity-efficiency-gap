@@ -1,23 +1,33 @@
-"""Key functions to clean and filter data for use in utility data visualizations"""
+"""Functions to clean and filter data for use in utility data visualizations"""
 
 import pandas as pd
 
 
 def get_state_variance(df: pd.DataFrame) -> pd.DataFrame:
     """Summarizes key metrics for states to help choose state for analysis"""
+
     agg_df = df.groupby('Utility.State').agg({
-        'ResidentialUnitPrice': ['std', 'mean'],      # High std = High drama
-        'Utility.Type': 'nunique',                # High nunique = Better comparisons
-        # High max = Great outlier stories
-        'SystemLossPercentage': 'max',
-        # High mean = Interesting industrial dynamics
-        'IndustrialRevenueRatio': 'mean'
+        'Utility.Name': 'nunique',                # Want = More utilites to analyze
+        'Utility.Type': 'nunique',                # Want = More utility types to compare
+        'ResidentialUnitPrice': 'std',            # Want = High std for varied utilities
+        'SystemLossPercentage': 'max',            # Want = Great outlier stories
+        'IndustrialRevenueRatio': 'mean'          # Want = High for industrial bias
     })
+
+    agg_df.rename(columns={
+        'Utility.Name': '# Utilities',
+        'Utility.Type': '# Utility Types',
+        'Utility.State': 'State',
+        'ResidentialUnitPrice': 'Residential Price Std. Dev.',
+        'SystemLossPercentage': 'System Loss %',
+        'IndustrialRevenueRatio': 'Industrial Revenue %'
+    }, inplace=True)
 
     agg_df.columns = [f"{col[0]}_{col[1]}" if isinstance(col, tuple) else col
                       for col in agg_df.columns.values]
+    agg_df.sort_values('Residential Price Std. Dev.', ascending=False, inplace=True)
 
-    return agg_df.reset_index()
+    return agg_df.reset_index().head(10)
 
 
 def get_state_data(state: str, df: pd.DataFrame) -> pd.DataFrame:
@@ -68,12 +78,12 @@ def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def get_customer_utilities(df: pd.DataFrame, customer: str) -> pd.DataFrame:
+def get_customer_utilities(df: pd.DataFrame, sector: str) -> pd.DataFrame:
     """Filter data by customer type for use in plots"""
-    if customer == "Residential":
+    if sector == "Residential":
         return df[df["Retail.Residential.Customers"] > 0]
 
-    elif customer == "Industrial":
+    elif sector == "Industrial":
         return df[df["Retail.Industrial.Customers"] > 0]
 
     else:
