@@ -1,5 +1,7 @@
 """ Functions to create and retrieves interactive plotly charts  """
 
+import os
+
 import pandas as pd
 import numpy as np
 
@@ -14,15 +16,15 @@ from plotly.subplots import make_subplots
 
 def get_state_variance_table(df: pd.DataFrame) -> go.Figure:
     """Retrieve table of states with highest mean residential unit price"""
-    target, row_h = 7, 35
-    
+    target, row_h, header_h = 7, 35, 50
+
     fig = go.Figure(go.Table(
         header=dict(
             values=list(df.columns),
             fill_color='#f8f9fa',
             font=dict(size=12, family="Arial Black",),
             align='center',
-            height=row_h*1.5
+            height=header_h
         ),
         cells=dict(
             values=df.values.T,
@@ -37,7 +39,7 @@ def get_state_variance_table(df: pd.DataFrame) -> go.Figure:
 
     fig.update_layout(
         margin=dict(l=5, r=5, t=5, b=5),
-        height=row_h * 12,
+        height=row_h * (len(df) + 2),
         autosize=False
     )
 
@@ -220,6 +222,53 @@ def get_rate_disparity_dumbbell_plot(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
+def add_utility_dropdown(fig: go.Figure, df: pd.DataFrame) -> go.Figure:
+    """Post-processing function to add a utility dropdown justified right."""
+    buttons = []
+
+    for _, r in df.iterrows():
+        buttons.append(dict(
+            method="update",
+            label=r["Utility.Name"],
+            args=[
+                {"link.value": [[
+                    r["Sources.Generation"], r["Sources.Purchased"], r["Sources.Other"],
+                    r["Uses.Retail"], r["Uses.Resale"], r["Uses.Losses"],
+                    r["Uses.Consumed"], r["Uses.No Charge"]
+                ]]},
+                {"title.text": f"<b>Energy Flow: </b>{r['Utility.Name']}"}
+            ]
+        ))
+
+    first_row = df.iloc[0]
+    initial_values = [
+        first_row["Sources.Generation"], first_row["Sources.Purchased"], first_row["Sources.Other"],
+        first_row["Uses.Retail"], first_row["Uses.Resale"], first_row["Uses.Losses"],
+        first_row["Uses.Consumed"], first_row["Uses.No Charge"]
+    ]
+
+    # 2. Directly assign the values to the first trace (the Sankey)
+    # This ensures the values are injected before the figure is rendered
+    fig.data[0].link.value = initial_values
+
+    # 3. Apply the layout and the dropdown menu
+    fig.update_layout(
+        title_text=f"<b>Energy Flow: </b>{first_row['Utility.Name']}",
+        updatemenus=[dict(
+            buttons=buttons,
+            direction="down",
+            showactive=True,
+            x=1.0,
+            xanchor="right",
+            y=2,
+            yanchor="top",
+            active=0
+        )],
+    )
+
+    return fig
+
+
 def get_energy_use_sankey_plot(row: pd.DataFrame) -> go.Figure:
     """Get energy usage sankey plot"""
     labels = ["Generated", "Purchased", "Other", "Uses", "Retail Sales",
@@ -256,7 +305,14 @@ def get_energy_use_sankey_plot(row: pd.DataFrame) -> go.Figure:
 
 
 def export_plots_as_svg(plots: list[go.Figure]) -> None:
-    """Export all plots as high-definition SVGs"""
+    """Export plots as high-definition SVGs to the 'images' folder"""
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    target_dir = os.path.join(script_dir, "..", "..", "images")
+
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+
     pio.write_images(fig=plots,
                      file=["images/top_ten_state_res_variance_table.svg",
                            "images/residential_utility_type_box_plot.svg",
@@ -264,5 +320,5 @@ def export_plots_as_svg(plots: list[go.Figure]) -> None:
                            "images/key_metrics_corr_heatmap.svg",
                            "images/rate_fairness_dual_y_scatter_plot.svg",
                            "images/rate_disparity_dumbbell_plot.svg",
-                           "images/energy_usage_utility_sankey_chart.svg",
+                           "images/energy_usage_ny_sankey_chart.svg",
                            "images/energy_usage_us_sankey_chart.svg"])

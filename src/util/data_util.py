@@ -118,8 +118,10 @@ def get_utility_usage(utility: pd.Series, level: str = "State") -> pd.DataFrame:
     named_utility = (utility[keys] / utility['Sources.Total']) * 100
 
     if level == "State":
-        named_utility['Utility.Name'] = utility['Utility.Name']
-    else:
+        named_utility['Utility.Name'] = "State of " + utility['Utility.State'][0:2] 
+    elif level == "US":
         named_utility['Utility.Name'] = "United States"
+    else:
+        named_utility['Utility.Name'] = utility['Utility.Name']
 
     return named_utility
