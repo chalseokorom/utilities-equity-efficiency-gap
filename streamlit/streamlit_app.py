@@ -1,10 +1,15 @@
-import pandas as pd
+import src.util.plot_util as plot_util
+import src.util.data_util as data_util
+import data.electricity as electricity
 
 import streamlit as st
+import pandas as pd
 
-import data.electricity as electricity
-import src.util.data_util as data_util
-import src.util.plot_util as plot_util
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 st.set_page_config(
     page_title="Utility Efficiency & Rates",
@@ -34,7 +39,8 @@ with st.sidebar:
         "— energy losses and poor load factors — correlate with "
         "higher residential electricity rates."
     )
-    st.markdown("[View on GitHub](https://github.com/chalseokorom/utilities-equity-efficiency-gap)")
+    st.markdown(
+        "[View on GitHub](https://github.com/chalseokorom/utilities-equity-efficiency-gap)")
 
 state_df, full_df = load_data(state)
 
