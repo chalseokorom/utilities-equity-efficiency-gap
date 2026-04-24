@@ -192,11 +192,11 @@ def get_fairness_dual_y_scatter_plot(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def get_rate_disparity_dumbbell_plot(df: pd.DataFrame) -> go.Figure:
+def get_rate_disparity_dumbbell_plot(df: pd.DataFrame, top_n: int = 10) -> go.Figure:
     """Get dumbbell plot of highest disparities between industrial/residential rates"""
     # Sort by spread to show the most "unfair" utilities at the top
     df_sorted = df[df.PriceSpread > 0].sort_values(
-        'PriceSpread', ascending=True).tail(10)
+        'PriceSpread', ascending=True).tail(top_n)
 
     fig = go.Figure()
 

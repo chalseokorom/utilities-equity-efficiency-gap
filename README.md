@@ -8,7 +8,9 @@
 
 This project investigates a fundamental fairness question in the U.S. electricity sector: do residential customers end up paying more when their utility operates inefficiently? Using the [CORGIS Electricity Dataset](https://corgis-edu.github.io/corgis/), this analysis builds a set of derived efficiency and equity metrics, then examines their statistical relationships through a suite of interactive visualizations.
 
-The analysis focuses on **New York State** utilities as a case study, comparing investor-owned, municipal, cooperative, and other utility ownership models. New York was chosen BECAUSE 
+New York State serves as the primary case study. NY was selected through a data-driven ranking process (get_state_variance) that scores all 50 states across five analytical criteria: number of utilities, number of ownership types, residential price standard deviation, maximum system loss percentage, and industrial revenue dependency. New York ranks at or near the top on all five: it has over 100 utilities across 7 distinct ownership models, exhibits high residential price variance, and sits within one of the most actively scrutinized regulatory environments in the U.S.
+
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-app-url.streamlit.app)
 
 ---
 
@@ -62,7 +64,7 @@ The three modules work as a clean pipeline:
 
 | Function | Purpose |
 |---|---|
-| `prepare_data(df)` | Engineers all derived metrics from raw columns |
+| `prepare_data(df)` | Calculates key metrics and other features from raw columns |
 | `get_state_data(state, df)` | Filters and subsets data for a given state |
 | `get_state_variance(df)` | Ranks states by residential price variance (for state selection) |
 | `get_customer_utilities(df, customer)` | Filters utilities by customer type served |
