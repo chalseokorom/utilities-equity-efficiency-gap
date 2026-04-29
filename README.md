@@ -1,4 +1,16 @@
-# ⚡ Electricity Utility Inefficiency & Residential Rate Analysis
+---
+title: Utility Efficiency & Rates
+emoji: ⚡
+colorFrom: blue
+colorTo: yellow
+sdk: streamlit
+sdk_version: "1.56.0"
+app_file: streamlit_app.py
+pinned: false
+---
+
+
+# Electricity Utility Fairness Residential Rate Analysis
 
 > **Research Question:** Are system-level inefficiencies — high energy losses and poor load factors — statistically correlated with higher retail rates for residential consumers?
 
@@ -8,7 +20,7 @@
 
 This project investigates a fundamental fairness question in the U.S. electricity sector: do residential customers end up paying more when their utility operates inefficiently? Using the [CORGIS Electricity Dataset](https://corgis-edu.github.io/corgis/), this analysis builds a set of derived efficiency and equity metrics, then examines their statistical relationships through a suite of interactive visualizations.
 
-New York State serves as the primary case study. NY was selected through a data-driven ranking process (get_state_variance) that scores all 50 states across five analytical criteria: number of utilities, number of ownership types, residential price standard deviation, maximum system loss percentage, and industrial revenue dependency. New York ranks at or near the top on all five: it has over 100 utilities across 7 distinct ownership models, exhibits high residential price variance, and sits within one of the most actively scrutinized regulatory environments in the U.S.
+New York State serves as the primary case study. NY was selected through a data-driven ranking process (get_state_variance) that scores all 50 states across five analytical criteria: number of utilities, number of ownership types, residential price standard deviation, maximum system loss percentage, and industrial revenue dependency. New York ranks at or near the top on all five: it has over 100 utilities across 6 distinct ownership models, exhibits high residential price variance, and sits within one of the most actively scrutinized regulatory environments in the U.S.
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-app-url.streamlit.app)
 
@@ -18,20 +30,17 @@ New York State serves as the primary case study. NY was selected through a data-
 
 | Metric | Description |
 |---|---|
-| `SystemLossPercentage` | Energy lost in transmission/distribution as % of total supply |
-| `LoadFactor` | Ratio of actual energy delivered to theoretical maximum (demand efficiency) |
-| `ResidentialUnitPrice` | Residential rate in $/MWh |
-| `IndustrialUnitPrice` | Industrial rate in $/MWh |
-| `PriceSpread` | Gap between residential and industrial rates (equity indicator) |
-| `FairnessIndex` | Residential price normalized by load factor (equity/burden metric) |
-
+| `System Loss Percentage` | Energy lost in transmission/distribution as % of total supply |
+| `Load Factor` | Ratio of actual energy delivered to theoretical maximum (demand efficiency) |
+| `Residential Unit Price` | Residential rate in $/MWh |
+| `Industrial Unit Price` | Industrial rate in $/MWh |
+| `Price Spread` | Gap between residential and industrial rates (equity indicator) |
 ---
 
 ## Visualizations
 
 - **State Selection Table** — Ranking of top 10 states by analytical richness; justifies NY case study
-- **Residential Price Box Plot** — Distribution of residential rates across ownership models
-- **Industrial Price Box Plot** — Distribution of industrial rates across ownership models
+- **Price Spread Strip Plot** — Residential premium over industrial rates by ownership model
 - **Correlation Heatmap** — Statistical significance matrix across all key metrics
 - **Fairness Audit Scatter** — System loss (%) and load factor (dual y-axis) vs. residential price by ownership model, with OLS trendline
 - **Rate Disparity Dumbbell** — Top 10 utilities by residential–industrial price gap
@@ -45,14 +54,16 @@ New York State serves as the primary case study. NY was selected through a data-
 ```
 .
 ├── utility_efficiency_fairness.ipynb
+├── streamlit_app.py
+├── requirements.txt
+├── README.md
 ├── data/
 │   └── electricity.py
+│   └── app.py
+│   └── electricity.data
 │   └── electricity.data
 ├── src/
-│   └── util/
-│       ├── data_util.py
-│       └── plot_util.py
-└── images/            
+│   └── util/         
 ```
 
 The three modules work as a clean pipeline:
@@ -78,7 +89,7 @@ The three modules work as a clean pipeline:
 
 - The dataset is pre-bundled — no external downloads required for it.
 - Run `jupytr notebook utility_efficiency_fairness.ipynb.`
-- Run pip install pandas plotly scipy kaleido
+- Run `pip install pandas plotly scipy kaleido streamlit`
 
 ---
 

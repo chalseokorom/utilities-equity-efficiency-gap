@@ -44,7 +44,7 @@ def get_state_data(state: str, df: pd.DataFrame) -> pd.DataFrame:
                     "Uses.No Charge", "Uses.Consumed", "Uses.Total",
                     "Demand.Summer Peak", "Revenues.Retail"]
 
-    return df[df["Utility.State"] == state][keep_columns]
+    return df[df["Utility.State"] == state][keep_columns].copy()
 
 
 def prepare_data(df: pd.DataFrame) -> pd.DataFrame:

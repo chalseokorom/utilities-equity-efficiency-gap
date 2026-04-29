@@ -1,10 +1,13 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import src.util.plot_util as plot_util
 import src.util.data_util as data_util
 import data.electricity as electricity
 
 import streamlit as st
 import pandas as pd
-
 
 st.set_page_config(
     page_title="Utility Efficiency & Rates",
@@ -21,10 +24,9 @@ def load_data(state: str) -> pd.DataFrame:
 
 
 with st.sidebar:
-    st.title("⚡ Controls")
     state = st.selectbox(
         "Select State",
-        options=["NY", "CA", "TX", "FL", "PA", "IL", "OH"],
+        options=["NY", "AK", "RI", "ME", "CA", "NJ", "CT", "NH", "MA", "AZ"],
         index=0
     )
     st.markdown("---")
@@ -79,7 +81,7 @@ n_utilities = st.slider(
     min_value=5, max_value=20, value=10, step=1
 )
 
-both_df = data_util.get_customer_utilities(state_df).round(2)
+both_df = data_util.get_customer_utilities(state_df, sector="Both").round(2)
 st.plotly_chart(
     plot_util.get_rate_disparity_dumbbell_plot(both_df, top_n=n_utilities),
     use_container_width=True
@@ -88,26 +90,35 @@ st.divider()
 
 # ── Section 4: Energy Flow ────────────────────────────────────
 st.header("Energy Flow — Sources & Uses")
+# Row 1: State aggregate
+st.subheader(f"{state} — Aggregate Energy Flow")
+st.caption(
+    "How all utilities in this state collectively source and distribute energy.")
 
-col1, col2 = st.columns(2)
+numeric_sum = state_df.select_dtypes(include='number').sum()
+numeric_sum['Utility.Name'] = state
+state_flow = data_util.get_utility_usage(numeric_sum, level="US")
 
-with col1:
-    st.subheader(f"{state} Aggregate")
-    state_flow = data_util.get_utility_usage(state_df.sum(), level="State")
-    state_flow['Utility.Name'] = state  # label it as state name
-    st.plotly_chart(
-        plot_util.get_energy_use_sankey_plot(state_flow),
-        use_container_width=True
-    )
+st.plotly_chart(
+    plot_util.get_energy_use_sankey_plot(state_flow),
+    use_container_width=True
+)
 
-with col2:
-    st.subheader("Individual Utility")
-    utility_names = sorted(state_df['Utility.Name'].dropna().unique())
-    selected_utility = st.selectbox("Select a utility", options=utility_names)
-    utility_row = state_df[state_df['Utility.Name']
-                           == selected_utility].iloc[0]
-    utility_flow = data_util.get_utility_usage(utility_row, level="Utility")
-    st.plotly_chart(
-        plot_util.get_energy_use_sankey_plot(utility_flow),
-        use_container_width=True
-    )
+st.divider()
+
+# Row 2: Individual utility explorer
+st.subheader("Individual Utility — Energy Flow")
+st.caption(
+    "Select a utility to see its specific energy breakdown. "
+    "Compare the Losses band against the state aggregate above."
+)
+
+utility_names = sorted(state_df['Utility.Name'].dropna().unique())
+selected_utility = st.selectbox("Select a utility", options=utility_names)
+utility_row = state_df[state_df['Utility.Name'] == selected_utility].iloc[0]
+utility_flow = data_util.get_utility_usage(utility_row, level="Utility")
+
+st.plotly_chart(
+    plot_util.get_energy_use_sankey_plot(utility_flow),
+    use_container_width=True
+)
