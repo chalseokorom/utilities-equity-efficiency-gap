@@ -8,7 +8,6 @@ import pandas as pd
 
 st.set_page_config(
     page_title="Utility Efficiency & Rates",
-    page_icon="⚡",
     layout="wide"
 )
 
@@ -39,7 +38,7 @@ with st.sidebar:
 
 state_df, full_df = load_data(state)
 
-st.title("⚡ Electricity Utility Inefficiency & Residential Rate Analysis")
+st.title("Electricity Utility Fairness Residential Rate Analysis")
 st.caption(
     f"Exploring {state} utilities — "
     f"{len(state_df)} utilities across "
@@ -64,18 +63,10 @@ st.plotly_chart(
 st.divider()
 
 # ── Section 2: Ownership Models ───────────────────────────────
-st.header("Ownership Model — Price Distribution")
+st.header("Ownership Model — Price Spread")
 
-sector = st.radio(
-    "Customer sector",
-    options=["Residential", "Industrial"],
-    horizontal=True,
-    label_visibility="collapsed"
-)
-
-sector_df = data_util.get_customer_utilities(state_df, sector).round(2)
 st.plotly_chart(
-    plot_util.get_utility_type_box_plot(sector_df, sector),
+    plot_util.get_price_spread_strip_plot(state_df.round(2)),
     use_container_width=True
 )
 st.divider()
@@ -88,7 +79,7 @@ n_utilities = st.slider(
     min_value=5, max_value=20, value=10, step=1
 )
 
-both_df = data_util.get_customer_utilities(state_df, "Both").round(2)
+both_df = data_util.get_customer_utilities(state_df).round(2)
 st.plotly_chart(
     plot_util.get_rate_disparity_dumbbell_plot(both_df, top_n=n_utilities),
     use_container_width=True

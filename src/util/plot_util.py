@@ -45,27 +45,29 @@ def get_state_variance_table(df: pd.DataFrame) -> go.Figure:
 
     return fig
 
+def get_price_spread_strip_plot(df: pd.DataFrame):
+    """
+    Strip plot of Price Spread by ownership model.
+    Shows which ownership types most consistently charge 
+    residential customers more than industrial ones.
+    """
+    fig = px.strip(
+        df[df.PriceSpread > 0],
+        x="Utility.Type",
+        y="PriceSpread",
+        color="Utility.Type",
+        hover_name="Utility.Name",
+        color_discrete_sequence=px.colors.qualitative.Prism,
+        title="<b>Rate Equity by Ownership Model:</b> "
+              "Residential Premium Over Industrial Rates",
+        labels={
+            "Utility.Type": "Type",
+            "PriceSpread": "Residential Premium ($/MWh)",
+        },
+        template="plotly_white"
+    )
 
-def get_utility_type_box_plot(df: pd.DataFrame, sector: str) -> go.Figure:
-    """Compare Price across Utility Types based on sector string"""
-
-    unit_price_col = f"{sector}UnitPrice"
-    customer_col = f"Retail.{sector}.Customers"
-
-    fig = px.box(df, x='Utility.Type', y=unit_price_col, color="Utility.Type",
-                 points="all", hover_name="Utility.Name",
-                 hover_data=[customer_col, "LoadFactor"],
-                 color_discrete_sequence=px.colors.qualitative.Prism,
-                 title=f"<b>Utility Type:</b> {sector} Price Distribution",
-                 labels={"Utility.Type": "Ownership Model",
-                         unit_price_col: f"{sector} Rate",
-                         customer_col: "Customer Count",
-                         "LoadFactor": "Load Factor"},
-                 template='plotly_white')
-
-    fig.update_layout(
-        xaxis_title="",
-        yaxis_title=f"{sector} Rate ($/MWh)")
+    fig.update_layout(showlegend=False)
 
     return fig
 
@@ -77,7 +79,6 @@ def get_key_metrics_corr_matrix(df: pd.DataFrame) -> go.Figure:
         'LoadFactor': 'Load Factor',
         'IndustrialRevenueRatio': 'Industrial Revenue %',
         'PriceSpread': 'Price Spread',
-        'FairnessIndex': 'Fairness Index'
     }
 
     corr_matrix = df[list(key_metrics.keys())].corr()
@@ -247,8 +248,7 @@ def add_utility_dropdown(fig: go.Figure, df: pd.DataFrame) -> go.Figure:
         first_row["Uses.Consumed"], first_row["Uses.No Charge"]
     ]
 
-    # 2. Directly assign the values to the first trace (the Sankey)
-    # This ensures the values are injected before the figure is rendered
+    # 2. Directly assign intial values to the intial Sankey
     fig.data[0].link.value = initial_values
 
     # 3. Apply the layout and the dropdown menu
@@ -278,8 +278,6 @@ def get_energy_use_sankey_plot(row: pd.DataFrame) -> go.Figure:
         valueformat=".1f",
         valuesuffix="%",
         node=dict(
-            pad=15, thickness=20,
-            line=dict(color="black", width=0.5),
             label=labels,
             color=px.colors.qualitative.Prism),
         link=dict(
@@ -315,8 +313,7 @@ def export_plots_as_svg(plots: list[go.Figure]) -> None:
 
     pio.write_images(fig=plots,
                      file=["images/top_ten_state_res_variance_table.svg",
-                           "images/residential_utility_type_box_plot.svg",
-                           "images/industrial_utility_type_box_plot.svg",
+                           "images/utility_type_strip_plot.svg",
                            "images/key_metrics_corr_heatmap.svg",
                            "images/rate_fairness_dual_y_scatter_plot.svg",
                            "images/rate_disparity_dumbbell_plot.svg",

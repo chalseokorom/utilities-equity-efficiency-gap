@@ -27,10 +27,10 @@ def load_data(state: str) -> pd.DataFrame:
 
 
 with st.sidebar:
-    st.title("⚡ Controls")
+    st.title("State")
     state = st.selectbox(
         "Select State",
-        options=["NY", "CA", "TX", "FL", "PA", "IL", "OH"],
+        options=["NY", "AK", "RI", "ME", "CA", "NJ", "CT", "NH", "MA", "AZ"],
         index=0
     )
     st.markdown("---")
@@ -44,7 +44,7 @@ with st.sidebar:
 
 state_df, full_df = load_data(state)
 
-st.title("⚡ Electricity Utility Inefficiency & Residential Rate Analysis")
+st.title("Electricity Utility Residential Rate Analysis")
 st.caption(
     f"Exploring {state} utilities — "
     f"{len(state_df)} utilities across "
@@ -89,7 +89,7 @@ st.divider()
 st.header("Rate Disparity — Residential vs. Industrial")
 
 n_utilities = st.slider(
-    "Number of utilities to show",
+    "Number of utilities",
     min_value=5, max_value=20, value=10, step=1
 )
 
@@ -106,7 +106,7 @@ st.header("Energy Flow — Sources & Uses")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader(f"{state} Aggregate")
+    st.subheader(f"{state} Total")
     state_flow = data_util.get_utility_usage(state_df.sum(), level="State")
     state_flow['Utility.Name'] = state  # label it as state name
     st.plotly_chart(
@@ -115,9 +115,9 @@ with col1:
     )
 
 with col2:
-    st.subheader("Individual Utility")
+    st.subheader("By Utility")
     utility_names = sorted(state_df['Utility.Name'].dropna().unique())
-    selected_utility = st.selectbox("Select a utility", options=utility_names)
+    selected_utility = st.selectbox("Select utility", options=utility_names)
     utility_row = state_df[state_df['Utility.Name']
                            == selected_utility].iloc[0]
     utility_flow = data_util.get_utility_usage(utility_row, level="State")

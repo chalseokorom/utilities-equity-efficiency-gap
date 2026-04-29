@@ -2,6 +2,8 @@
 
 import pandas as pd
 
+HOURS_PER_YEAR = 8760
+
 
 def get_state_variance(df: pd.DataFrame) -> pd.DataFrame:
     """Summarizes key metrics for states to help choose state for analysis"""
@@ -25,7 +27,8 @@ def get_state_variance(df: pd.DataFrame) -> pd.DataFrame:
 
     agg_df.columns = [f"{col[0]}_{col[1]}" if isinstance(col, tuple) else col
                       for col in agg_df.columns.values]
-    agg_df.sort_values('Residential Price Std. Dev.', ascending=False, inplace=True)
+    agg_df.sort_values('Residential Price Std. Dev.',
+                       ascending=False, inplace=True)
 
     return agg_df.reset_index().head(10)
 
@@ -69,16 +72,15 @@ def prepare_data(df: pd.DataFrame) -> pd.DataFrame:
         df['Uses.Losses'] / df['Sources.Total']) * 100
 
     # Operational metric of 'stress' on system
-    df['LoadFactor'] = df['Sources.Total'] / (df['Demand.Summer Peak'] * 8760)
+    df['LoadFactor'] = df['Sources.Total'] / \
+        (df['Demand.Summer Peak'] * HOURS_PER_YEAR)
     df['LoadFactor'] = df['LoadFactor'].apply(
         lambda load: 0 if load == float('inf') else load)
-
-    df['FairnessIndex'] = df['ResidentialUnitPrice'] / df['LoadFactor']
 
     return df
 
 
-def get_customer_utilities(df: pd.DataFrame, sector: str) -> pd.DataFrame:
+def get_customer_utilities(df: pd.DataFrame, sector="Residential") -> pd.DataFrame:
     """Filter data by customer type for use in plots"""
     if sector == "Residential":
         return df[df["Retail.Residential.Customers"] > 0]
@@ -86,9 +88,8 @@ def get_customer_utilities(df: pd.DataFrame, sector: str) -> pd.DataFrame:
     elif sector == "Industrial":
         return df[df["Retail.Industrial.Customers"] > 0]
 
-    else:
-        return df[(df["Retail.Residential.Customers"] > 0)
-                  & (df["Retail.Industrial.Customers"] > 0)]
+    return df[(df["Retail.Residential.Customers"] > 0)
+              & (df["Retail.Industrial.Customers"] > 0)]
 
 
 def get_residential_load_factor(df: pd.DataFrame) -> pd.DataFrame:
@@ -118,7 +119,8 @@ def get_utility_usage(utility: pd.Series, level: str = "State") -> pd.DataFrame:
     named_utility = (utility[keys] / utility['Sources.Total']) * 100
 
     if level == "State":
-        named_utility['Utility.Name'] = "State of " + utility['Utility.State'][0:2] 
+        named_utility['Utility.Name'] = "State of " + \
+            utility['Utility.State'][0:2]
     elif level == "US":
         named_utility['Utility.Name'] = "United States"
     else:
